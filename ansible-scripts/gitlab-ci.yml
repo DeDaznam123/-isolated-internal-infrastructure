@@ -1,0 +1,38 @@
+before_script:
+  - export ANSIBLE_HOST_KEY_CHECKING=False
+  - chmod 600 ./victor_handzhiev.pem
+  - export nextCloud_ip=${nextCloud_ip}
+  - export openVPN_ip=${openVPN_ip}
+  - export rocketChat_ip=${rocketChat_ip}
+  - export vault_ip=${vault_ip}
+  - export ssh_key=${ssh_key}
+  - export db_url=${db_url}
+  - export s3_name=${s3_name}
+  - export aws_access_key=${AWS_ACCESS_KEY_ID}
+  - export aws_secret_key=${AWS_SECRET_ACCESS_KEY}
+
+stages:
+  - install-openVPN
+  - install-RocketChat
+  - install-NextCloud
+  - install-Vault
+
+install-openVPN:
+  stage: install-openVPN
+  script:
+    - ansible-playbook -i inventory.yml ./playbooks/openVPN-playbook.yml 
+
+install-RocketChat:
+  stage: install-RocketChat
+  script:
+    - ansible-playbook -i inventory.yml ./playbooks/rocket_chat-playbook.yml 
+
+install-NextCloud:
+  stage: install-NextCloud
+  script:
+    - ansible-playbook -i inventory.yml ./playbooks/next_cloud-playbook.yml 
+
+install-Vault:
+  stage: install-Vault
+  script:
+    - ansible-playbook -i inventory.yml ./playbooks/vault-playbook.yml 
