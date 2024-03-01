@@ -1,0 +1,17 @@
+myhosts:
+  hosts:
+    next_cloud:
+      ansible_host: ec2-user@{{ lookup('env', 'nextCloud_ip') }}
+      ansible_ssh_private_key_file: ./victor_handzhiev.pem
+    openVPN:
+      ansible_host: ec2-user@{{ lookup('env', 'openVPN_ip') }}
+      ansible_ssh_private_key_file: ./victor_handzhiev.pem
+    rocket_chat:
+      ansible_host: ec2-user@{{ lookup('env', 'rocketChat_ip') }}
+      ansible_ssh_private_key_file: ./victor_handzhiev.pem
+    vault:
+      ansible_host: ec2-user@{{ lookup('env', 'vault_ip') }}
+      ansible_ssh_private_key_file: ./victor_handzhiev.pem
+
+    
+  

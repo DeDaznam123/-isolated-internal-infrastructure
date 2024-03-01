@@ -1,0 +1,105 @@
+- name: Next Cloud
+  become: true
+  hosts: next_cloud
+  tasks:
+    - name: Update yum
+      ansible.builtin.yum:
+        name: '*'
+        state: latest
+        exclude: kernel*
+        update_cache: yes
+    
+    - name: Enable PHP-8.2
+      shell: sudo amazon-linux-extras enable php8.2
+
+    - name: Clean metadata
+      shell: sudo yum clean metadata
+
+    - name: Install PHP-8.2 and modules
+      ansible.builtin.yum:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - php
+        - php-fpm
+        - php-mysqlnd 
+        - php-json 
+        - php-gmp 
+        - php-intl 
+        - php-mbstring 
+        - php-gd 
+        - php-curl
+        - php-devel 
+        - php-pear 
+        - libzip 
+        - libzip-devel
+
+    - name: Enable httpd
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: true
+ 
+    - name: Enable php
+      ansible.builtin.service:
+        name: php-fpm.service
+        state: started
+        enabled: true
+
+    - name: Increse PHP memory limit
+      shell: sudo sed -i "s/memory_limit = .*/memory_limit = 512M /" /etc/php.ini
+
+    - name: Donwload NextCloud
+      get_url:
+          url: https://download.nextcloud.com/server/releases/latest.zip
+          dest: .
+          mode: '0777'
+
+    - name: Unzip NextCloud
+      ansible.builtin.unarchive:
+        src: latest.zip
+        dest: /var/www/html
+        remote_src: yes
+        creates: /var/www/html/nextcloud
+
+    - name: Make directory for data
+      ansible.builtin.file:
+        path: /var/www/html/nextcloud/data
+        state: directory
+
+    - name: Copy nextcloud.conf
+      ansible.builtin.copy:
+        src: ../templates/nextcloud.conf
+        dest: /etc/httpd/conf.d/nextcloud.conf
+      
+    - name: Set Permissions
+      shell: sudo chown -R apache:apache /var/www/html/nextcloud/
+
+    - name: Set Permissions  
+      shell: sudo chmod -R 755 /var/www/html/nextcloud/
+
+    - name: Remove welcome page
+      ansible.builtin.file:
+        path: /etc/httpd/conf.d/welcome.conf
+        state: absent
+
+    - name: Stop httpd
+      ansible.builtin.service:
+        name: httpd
+        state: stopped
+
+    - name: Start httpd
+      ansible.builtin.service:
+        name: httpd
+        state: started
+
+    - name: Stop php
+      ansible.builtin.service:
+        name: php-fpm.service
+        state: stopped
+        
+    - name: Start php
+      ansible.builtin.service:
+        name: php-fpm.service
+        state: started
+      

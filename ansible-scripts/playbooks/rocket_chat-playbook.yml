@@ -1,0 +1,75 @@
+- name: Rocket Chat
+  become: true
+  hosts: rocket_chat
+  tasks:
+    - name: Install Docker
+      ansible.builtin.yum:
+        name: docker
+        state: latest
+
+    - name: Start Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+    
+    - name: Download Docker Compose binary
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-Linux-x86_64"
+        dest: /usr/bin/docker-compose
+        mode: '0777'
+
+    - name: Make directory for compose file
+      ansible.builtin.file:
+        path: ./rocket_chat
+        state: directory
+
+    - name: Write docker-compose.yml
+      ansible.builtin.template:
+        dest: ./rocket_chat/docker-compose.yml
+        src: ../templates/rocket_chat-compose.yml
+      vars:
+        rocketchat_version: 4.8.6
+        mongo_version: 4.4
+
+    - name: Run docker-compose.yml
+      command: docker-compose up -d
+      args:
+        chdir: ./rocket_chat
+
+    - name: Download AWS CLI .zip
+      get_url:
+        url: "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"
+        dest: ./awscliv2.zip
+
+    - name: Unzip AWS CLI
+      ansible.builtin.unarchive:
+        src: ./awscliv2.zip
+        dest: ./
+    
+    - name: Install AWS CLI
+      command: ./aws/install
+
+    - name: Configure AWS CLI
+      command: "aws configure set aws_access_key_id '{{ lookup('env', 'aws_access_key') }}' && aws configure set aws_secret_access_key '{{ lookup('env', 'aws_secret_key') }}' && aws configure set default.region 'eu-central-1'"
+
+    - name: Copy backup script
+      ansible.builtin.template:
+        src: ../templates/rocket_chat-mongo-backup.sh
+        dest: ./
+        mode: '0777'
+      vars:
+        s3_name: "{{ lookup('env', 's3_name') }}"
+
+    - name: Make directory for db dumps
+      ansible.builtin.file:
+        path: /db-dumps
+        state: directory
+
+    - name: Schedule backup
+      ansible.builtin.cron:
+        name: "Mongo backup"
+        minute: "0"
+        hour: "2"
+        job: "/rocket_chat-mongo-backup.sh"
+

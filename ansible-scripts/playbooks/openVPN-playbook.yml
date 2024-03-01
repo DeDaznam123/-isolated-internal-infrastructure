@@ -1,0 +1,22 @@
+- name: openVPN
+  become: true
+  hosts: openVPN
+  vars:
+    ip: "{{ lookup('env', 'openVPN_ip') }}"
+  tasks:
+  - name: Download openVPN
+    get_url:
+      url: https://raw.githubusercontent.com/angristan/openvpn-install/master/openvpn-install.sh
+      dest: .
+      mode: '0777'
+
+  - name: Run openVPN
+    shell: APPROVE_INSTALL=y ENDPOINT=$(curl -4 ifconfig.co) APPROVE_IP=y IPV6_SUPPORT=n PORT_CHOICE=1 PROTOCOL_CHOICE=1 DNS=1 COMPRESSION_ENABLED=n  CUSTOMIZE_ENC=n CLIENT=installation PASS=1 ./openvpn-install.sh 
+    
+  - name: Fix client file
+    command: "sed -i '4s/.*/remote {{ ip }} 1194/' installation.ovpn"
+
+ 
+
+
+    

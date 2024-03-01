@@ -1,0 +1,38 @@
+- name: Vault
+  hosts: vault
+  become: true
+  tasks:
+    - name: Install Docker
+      ansible.builtin.yum:
+        name: docker
+        state: latest
+
+    - name: Start Docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Download Docker Compose binary
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-Linux-x86_64"
+        dest: /usr/bin/docker-compose
+        mode: '0777'
+
+    - name: Make directory for compose file
+      ansible.builtin.file:
+        path: ./vault
+        state: directory
+    
+    - name: Write docker-compose.yml
+      ansible.builtin.template:
+        dest: ./vault/docker-compose.yml
+        src: ../templates/vault-compose.yml
+      vars:
+        vault_version: 1.13.1
+        db_url: "{{ lookup('env', 'db_url') }}"
+     
+    - name: Run docker-compose.yml
+      command: docker-compose up -d
+      args:
+        chdir: ./vault
