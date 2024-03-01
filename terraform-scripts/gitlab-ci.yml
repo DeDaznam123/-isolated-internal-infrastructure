@@ -1,0 +1,34 @@
+before_script:
+    - export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    - export TF_VAR_registration_token=${registration_token}
+    - export TF_VAR_gitlab_instance_url=${gitlab_instance_url}
+
+stages:
+    - init
+    - validate
+    - plan
+    - apply
+
+init:
+    stage: init
+    script:
+        - terraform init
+
+validate:
+    stage: validate
+    script:
+        - terraform validate
+
+plan:
+    stage: plan
+    script:
+        - terraform init
+        - terraform plan
+
+apply:
+    stage: apply
+    script:
+        - terraform init
+        - terraform apply -auto-approve
+    when: manual
