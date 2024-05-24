@@ -169,30 +169,18 @@ module "ec2-Vault"{
   depends_on = [ module.subnet-private ]
 }
 
-resource "aws_db_instance" "db-Vault" {
+resource "aws_db_instance" "victor-database" {
   allocated_storage = 10
   engine = "mysql"
-  db_name = "victorTerraformDB-Vault"
   engine_version = "8.0"
   instance_class = "db.t3.micro"
-  username = "victor"
-  password = "victor123"
-  skip_final_snapshot = true
-}
-
-resource "aws_db_instance" "db-NextCloud" {
-  allocated_storage = 10
-  engine = "mysql"
-  db_name = "victorTerraformDB-NextCloud"
-  engine_version = "8.0"
-  instance_class = "db.t3.micro"
-  username = "victor"
-  password = "victor123"
+  username = "${var.rds_username}"
+  password = "${var.rds_password}"
+  publicly_accessible = true
   skip_final_snapshot = true
 }
 
 resource "aws_s3_bucket" "backup-bucket" {
   bucket = "victor-terraform-backup"
 }
-
 
