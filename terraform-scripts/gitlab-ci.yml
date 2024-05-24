@@ -3,6 +3,8 @@ before_script:
     - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     - export TF_VAR_registration_token=${registration_token}
     - export TF_VAR_gitlab_instance_url=${gitlab_instance_url}
+    - export rds_password=${rds_password}
+    - export rds_username=${rds_username}
 
 stages:
     - init
