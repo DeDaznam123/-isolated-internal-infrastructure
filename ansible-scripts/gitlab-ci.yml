@@ -5,12 +5,13 @@ before_script:
   - export openVPN_ip=${openVPN_ip}
   - export rocketChat_ip=${rocketChat_ip}
   - export vault_ip=${vault_ip}
-  - export ssh_key=${ssh_key}
   - export db_url=${db_url}
   - export s3_name=${s3_name}
   - export aws_access_key=${AWS_ACCESS_KEY_ID}
   - export aws_secret_key=${AWS_SECRET_ACCESS_KEY}
-
+  - export rds_username=${rds_username}
+  - export rds_password=${rds_password}
+  
 stages:
   - install-openVPN
   - install-RocketChat
