@@ -176,7 +176,6 @@ resource "aws_db_instance" "victor-database" {
   instance_class = "db.t3.micro"
   username = "${var.rds_username}"
   password = "${var.rds_password}"
-  publicly_accessible = true
   skip_final_snapshot = true
 }
 
