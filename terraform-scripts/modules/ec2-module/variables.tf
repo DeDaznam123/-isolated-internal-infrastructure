@@ -7,7 +7,7 @@ variable "ingress-rules"{
         description = string
     }))
 }
-variable "user_data" {
+variable "user-data" {
     type = string
     default = ""
   
