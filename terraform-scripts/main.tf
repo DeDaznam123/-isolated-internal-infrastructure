@@ -98,7 +98,7 @@ module "ec2-openVPN"{
     }
   ]
   
-  user_data = <<EOF
+  user-data = <<EOF
 		#!/bin/bash
 		yum update -y
     sudo yum install -y git
@@ -169,14 +169,13 @@ module "ec2-Vault"{
   depends_on = [ module.subnet-private ]
 }
 
-resource "aws_db_instance" "victor-database" {
-  allocated_storage = 10
-  engine = "mysql"
-  engine_version = "8.0"
-  instance_class = "db.t3.micro"
+module "db"{
+  source = "./modules/db-module"
+  subnet-id = [module.subnet-private.subnet-id, module.subnet-public.subnet-id]
+  security_groups = [module.ec2-NextCloud.security-group-id, module.ec2-Vault.security-group-id]
   username = "${var.rds_username}"
   password = "${var.rds_password}"
-  skip_final_snapshot = true
+  vpc-id = aws_vpc.vpc.id
 }
 
 resource "aws_s3_bucket" "backup-bucket" {
